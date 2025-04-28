@@ -1,26 +1,21 @@
 require("dotenv").config();
 const mongoose = require('mongoose');
 const connectDB = require('./db');
-
 // Connect to MongoDB
 connectDB();
-
 // Import Event model
 const Event = require('./models/Event');
 
-// Event image URLs (placeholder URLs - replace with actual image URLs)
+// Event image URLs using the actual files in your public/images directory
 const eventImages = [
-    '/images/Arijit_Singh.avif',
-    '/images/Neha_kakkar.jpeg',
-    '/images/badshah.webp',
-    '/images/AR_Rahman.jpg',
-    '/images/Shreya_ghosal.avif',
-    '/images/Divine.webp',
-    '/images/Sonu_Nigam.jpg',
-    '/images/Mohit_chauhan.jpeg',
-    '/images/concert5.jpg',
-  ];
-
+  '/images/Arijit_Singh.avif',
+  '/images/Neha_kakkar.jpeg',
+  '/images/badshah.webp',
+  '/images/AR_Rahman.jpg',
+  '/images/Shreya_ghosal.avif',
+  '/images/Divine.webp',
+  '/images/Sonu_Nigam.jpg'
+];
 
 // Fake events data
 const fakeEvents = [
@@ -33,7 +28,7 @@ const fakeEvents = [
     ticketPrice: 1500,
     totalTickets: 1000,
     availableTickets: 1000,
-    imageUrl: eventImages[0] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[0] // Arijit_Singh.avif
   },
   {
     eventId: 'event2',
@@ -44,7 +39,7 @@ const fakeEvents = [
     ticketPrice: 2000,
     totalTickets: 800,
     availableTickets: 650,
-    imageUrl: eventImages[1] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[1] // Neha_kakkar.jpeg
   },
   {
     eventId: 'event3',
@@ -55,7 +50,7 @@ const fakeEvents = [
     ticketPrice: 1800,
     totalTickets: 1200,
     availableTickets: 900,
-    imageUrl: eventImages[2] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[2] // badshah.webp
   },
   {
     eventId: 'event4',
@@ -66,7 +61,7 @@ const fakeEvents = [
     ticketPrice: 2500,
     totalTickets: 1500,
     availableTickets: 1500,
-    imageUrl: eventImages[3] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[3] // AR_Rahman.jpg
   },
   {
     eventId: 'event5',
@@ -77,7 +72,7 @@ const fakeEvents = [
     ticketPrice: 1700,
     totalTickets: 900,
     availableTickets: 750,
-    imageUrl: eventImages[4] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[4] // Shreya_ghosal.avif
   },
   {
     eventId: 'event6',
@@ -88,7 +83,7 @@ const fakeEvents = [
     ticketPrice: 1600,
     totalTickets: 800,
     availableTickets: 800,
-    imageUrl: eventImages[5] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[5] // Divine.webp
   },
   {
     eventId: 'event7',
@@ -99,19 +94,7 @@ const fakeEvents = [
     ticketPrice: 2200,
     totalTickets: 1100,
     availableTickets: 980,
-    imageUrl: eventImages[6] || '/images/concert-placeholder.jpg'
-  },
-
-  {
-    eventId: 'event8',
-    artistName: 'Mohit Chauhan',
-    eventName: 'Sonu Nigam Unplugged',
-    date: new Date('2024-02-10T19:00:00'),
-    venue: 'Kolkata Stadium',
-    ticketPrice: 2200,
-    totalTickets: 1100,
-    availableTickets: 980,
-    imageUrl: eventImages[7] || '/images/concert-placeholder.jpg'
+    imageUrl: eventImages[6] // Sonu_Nigam.jpg
   }
 ];
 
@@ -130,7 +113,7 @@ async function seedDatabase() {
     const allEvents = await Event.find({});
     console.log('All events in database:');
     allEvents.forEach(event => {
-      console.log(`- ${event.eventName} by ${event.artistName} on ${event.formattedDate}`);
+      console.log(`- ${event.eventName} by ${event.artistName} on ${event.formattedDate}, Image: ${event.imageUrl}`);
     });
     
     mongoose.connection.close();
