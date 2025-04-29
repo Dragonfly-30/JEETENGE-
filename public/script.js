@@ -164,56 +164,14 @@ function setupModals() {
 function setupBookButtons() {
   const bookButtons = document.querySelectorAll('.event-card button[data-event-id]');
   bookButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
+    button.addEventListener('click', (e) => {
       const eventId = e.target.getAttribute('data-event-id');
-      const modal = document.getElementById('booking-modal');
       
-      if (!modal) {
-        console.error('Booking modal not found in the DOM');
-        return;
-      }
-      
-      try {
-        // Try to use cached event data if available
-        let event;
-        const cachedEvents = dataCache.events;
-        
-        if (cachedEvents) {
-          event = cachedEvents.find(e => e.eventId === eventId);
-        }
-        
-        // Fetch if not in cache
-        if (!event) {
-          const response = await fetch(`/api/events/${eventId}`);
-          if (!response.ok) throw new Error('Failed to fetch event details');
-          event = await response.json();
-        }
-        
-        // Populate modal with event details
-        document.getElementById('booking-event-name').textContent = event.eventName;
-        document.getElementById('booking-event-artist').textContent = `Artist: ${event.artistName}`;
-        document.getElementById('booking-event-date').textContent = `Date: ${formatDate(event.date)}`;
-        document.getElementById('booking-event-venue').textContent = `Venue: ${event.venue}`;
-        document.getElementById('booking-event-price').textContent = `Price: ₹${event.ticketPrice} per ticket`;
-        document.getElementById('booking-tickets-available').textContent = 
-          `Available: ${event.availableTickets} out of ${event.totalTickets}`;
-        
-        // Set event ID in hidden field
-        document.getElementById('booking-event-id').value = event.eventId;
-        
-        // Calculate initial total
-        const quantity = document.getElementById('ticket-quantity').value;
-        document.getElementById('ticket-total').textContent = (quantity * event.ticketPrice).toFixed(2);
-        
-        // Show modal
-        modal.style.display = 'block';
-        
-      } catch (error) {
-        console.error('Error getting event details:', error);
-        alert('Could not load event details. Please try again later.');
-      }
+      // Redirect to the booking page with the event ID
+      window.location.href = `/booking.html?eventId=${eventId}`;
     });
   });
+}
   
   // Handle quantity change - update total price
   const quantityInput = document.getElementById('ticket-quantity');
@@ -281,9 +239,9 @@ function setupBookButtons() {
       }
     });
   }
-}
 
 // Fetch and Display Events from the database
+// Modified version of fetchEvents function with ranking based on user preferences
 async function fetchEvents() {
   // Prevent duplicate fetches
   if (loadingStatus.events) return;
@@ -307,39 +265,34 @@ async function fetchEvents() {
       upcomingEventsContainer.innerHTML = '<div class="loading">Loading events...</div>';
     }
     
-    // Use cached topArtists if available, otherwise fetch them
+    // Fetch user's top artists to use for ranking
     let topArtists = [];
-    if (dataCache.topArtists) {
-      topArtists = dataCache.topArtists;
-    } else {
-      try {
-        const artistRes = await fetch("/api/spotify/top-artists", { credentials: "include" });
-        if (artistRes.ok) {
-          const artistData = await artistRes.json();
-          if (artistData.items && artistData.items.length > 0) {
-            topArtists = artistData.items.map(artist => ({
-              name: artist.name.toLowerCase(),
-              popularity: artist.popularity,
-              index: artistData.items.indexOf(artist)
-            }));
-            dataCache.topArtists = topArtists;
-          }
+    try {
+      const artistRes = await fetch("/api/spotify/top-artists", { credentials: "include" });
+      if (artistRes.ok) {
+        const artistData = await artistRes.json();
+        if (artistData.items && artistData.items.length > 0) {
+          topArtists = artistData.items.map(artist => ({
+            name: artist.name.toLowerCase(),
+            popularity: artist.popularity,
+            // Higher index = less preferred (reversed ranking)
+            index: artistData.items.indexOf(artist)
+          }));
         }
-      } catch (err) {
-        console.error("Error fetching artist preferences:", err);
       }
+    } catch (err) {
+      console.error("Error fetching artist preferences:", err);
+      // Continue with unranked events if artist fetch fails
     }
     
-    // Use cached events if available, otherwise fetch them
-    let events = dataCache.events;
-    if (!events) {
-      const response = await fetch('/api/events');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      events = await response.json();
-      dataCache.events = events;
+    // Fetch all events
+    const response = await fetch('/api/events');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
+    let events = await response.json();
     
     // Rank events based on user's top artists if we have data
     if (topArtists.length > 0) {
@@ -428,7 +381,12 @@ async function fetchEvents() {
   }
 }
 
-// Ranks events based on user's top artists from Spotify
+/**
+ * Ranks events based on user's top artists from Spotify
+ * @param {Array} events - List of events to rank
+ * @param {Array} topArtists - User's top artists from Spotify
+ * @returns {Array} - Ranked events with added relevance score
+ */
 function rankEventsByUserPreference(events, topArtists) {
   // Clone events to avoid modifying original data
   const rankedEvents = [...events];
