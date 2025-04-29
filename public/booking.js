@@ -1,31 +1,105 @@
 // Booking Page Script
 document.addEventListener("DOMContentLoaded", async () => {
-    // Setup sidebar functionality
-    setupSidebar();
-    
-    // Fetch user data to personalize the page
-    await fetchUserData();
-    
-    // Get event ID from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('eventId');
-    
-    if (!eventId) {
-      // No event ID provided, show error
-      showBookingError("No event was selected. Please go back and select an event.");
-      return;
-    }
-    
-    // Load event details
-    await loadEventDetails(eventId);
-    
-    // Set up form event handlers
-    setupFormHandlers();
-  });
+  // Setup sidebar functionality
+  setupSidebar();
   
-  // Load Event Details from the server
-  async function loadEventDetails(eventId) {
-    try {
+  // Fetch user data to personalize the page
+  await fetchUserData();
+  
+  // Get event ID from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get('eventId');
+  
+  if (!eventId) {
+    // No event ID provided, show error
+    showBookingError("No event was selected. Please go back and select an event.");
+    return;
+  }
+  
+  // Load event details
+  await loadEventDetails(eventId);
+  
+  // Set up form event handlers
+  setupFormHandlers();
+});
+
+// Setup sidebar functionality
+function setupSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const mainContent = document.querySelector('.main-content');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarClose = document.getElementById('sidebar-close');
+
+  // Check if sidebar should be open on load (for larger screens)
+  function checkScreenSize() {
+      if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          sidebar.style.transform = 'translateX(-100%)';
+          mainContent.style.marginLeft = '0';
+      } else {
+          sidebar.classList.add('open');
+          sidebar.style.transform = 'translateX(0)';
+          mainContent.style.marginLeft = 'var(--sidebar-width)';
+      }
+  }
+
+  // Initialize sidebar state on page load
+  checkScreenSize();
+  
+  // Toggle sidebar when menu button is clicked
+  sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      if (sidebar.classList.contains('open')) {
+          sidebar.style.transform = 'translateX(0)';
+          if (window.innerWidth > 768) {
+              mainContent.style.marginLeft = 'var(--sidebar-width)';
+          }
+      } else {
+          sidebar.style.transform = 'translateX(-100%)';
+          mainContent.style.marginLeft = '0';
+      }
+  });
+
+  // Close sidebar when X button is clicked
+  if (sidebarClose) {
+      sidebarClose.addEventListener('click', function() {
+          sidebar.classList.remove('open');
+          sidebar.style.transform = 'translateX(-100%)';
+          mainContent.style.marginLeft = '0';
+      });
+  }
+
+  // Update layout when window is resized
+  window.addEventListener('resize', checkScreenSize);
+}
+
+// Fetch user data
+async function fetchUserData() {
+  try {
+      // This is a placeholder - replace with your actual API endpoint
+      const response = await fetch('/api/user/profile');
+      
+      if (response.ok) {
+          const userData = await response.json();
+          
+          // Update user information in the header
+          document.getElementById('username').textContent = `Welcome, ${userData.name}`;
+          document.getElementById('user-email').textContent = userData.membershipLevel || 'Member';
+          
+          // Update avatar if available
+          if (userData.avatarUrl) {
+              document.getElementById('user-avatar').src = userData.avatarUrl;
+          }
+      }
+  } catch (error) {
+      console.error("Error fetching user data:", error);
+      // Silently fail - not critical for page functionality
+  }
+}
+
+// Load Event Details from the server
+async function loadEventDetails(eventId) {
+  try {
       const eventLoading = document.getElementById('event-loading');
       const eventDetails = document.getElementById('event-details');
       
@@ -37,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/events/${eventId}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch event details. Status: ${response.status}`);
+          throw new Error(`Failed to fetch event details. Status: ${response.status}`);
       }
       
       const event = await response.json();
@@ -64,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       imageUrl = imageUrl.replace('public/', '');
       eventImage.src = imageUrl;
       eventImage.onerror = function() {
-        this.src = '/images/concert-placeholder.jpg';
+          this.src = '/images/concert-placeholder.jpg';
       };
       
       // Update quantity input max attribute based on available tickets
@@ -72,67 +146,67 @@ document.addEventListener("DOMContentLoaded", async () => {
       quantityInput.max = Math.min(event.availableTickets, 10); // Max 10 tickets per booking or available tickets
       
       if (event.availableTickets <= 0) {
-        // No tickets available
-        showBookingError("Sorry, this event is sold out.");
-        return;
+          // No tickets available
+          showBookingError("Sorry, this event is sold out.");
+          return;
       }
       
       // Hide loading state and show event details
       eventLoading.style.display = 'none';
       eventDetails.style.display = 'block';
       
-    } catch (error) {
+  } catch (error) {
       console.error("Error loading event details:", error);
       showBookingError("Failed to load event details. Please try again later.");
-    }
   }
-  
-  // Set up form handlers
-  function setupFormHandlers() {
-    // Handle quantity change to update total price
-    const quantityInput = document.getElementById('ticket-quantity');
-    if (quantityInput) {
+}
+
+// Set up form handlers
+function setupFormHandlers() {
+  // Handle quantity change to update total price
+  const quantityInput = document.getElementById('ticket-quantity');
+  if (quantityInput) {
       quantityInput.addEventListener('change', () => {
-        updateTotalPrice();
+          updateTotalPrice();
       });
       
       // Also handle input event for spinners
       quantityInput.addEventListener('input', () => {
-        updateTotalPrice();
+          updateTotalPrice();
       });
-    }
-    
-    // Handle form submission
-    const bookingForm = document.getElementById('booking-form');
-    if (bookingForm) {
+  }
+  
+  // Handle form submission
+  const bookingForm = document.getElementById('booking-form');
+  if (bookingForm) {
       bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await processBooking();
+          e.preventDefault();
+          await processBooking();
       });
-    }
-    
-    // Handle retry button
-    const retryButton = document.getElementById('retry-booking');
-    if (retryButton) {
+  }
+  
+  // Handle retry button
+  const retryButton = document.getElementById('retry-booking');
+  if (retryButton) {
       retryButton.addEventListener('click', () => {
-        // Hide error and show form again
-        document.getElementById('booking-error').style.display = 'none';
-        document.getElementById('event-details').style.display = 'block';
+          // Hide error and show form again
+          document.getElementById('booking-error').style.display = 'none';
+          document.getElementById('event-details').style.display = 'block';
       });
-    }
   }
-  
-  // Update total price based on quantity
-  function updateTotalPrice() {
-    const quantity = parseInt(document.getElementById('ticket-quantity').value);
-    const pricePerTicket = parseFloat(document.getElementById('per-ticket-price').textContent);
-    const totalPrice = (quantity * pricePerTicket).toFixed(2);
-    document.getElementById('ticket-total').textContent = totalPrice;
-  }
-  
-  // Process booking submission
-  async function processBooking() {
-    try {
+}
+
+// Update total price based on quantity
+function updateTotalPrice() {
+  const quantity = parseInt(document.getElementById('ticket-quantity').value);
+  const pricePerTicket = parseFloat(document.getElementById('per-ticket-price').textContent);
+  const totalPrice = (quantity * pricePerTicket).toFixed(2);
+  document.getElementById('ticket-total').textContent = totalPrice;
+}
+
+// Process booking submission
+async function processBooking() {
+  try {
       const eventId = document.getElementById('booking-event-id').value;
       const tickets = parseInt(document.getElementById('ticket-quantity').value);
       const attendeeName = document.getElementById('attendee-name').value;
@@ -141,92 +215,91 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       // Basic validation
       if (!attendeeName || !attendeeEmail || !attendeePhone) {
-        alert('Please fill in all fields.');
-        return;
+          alert('Please fill in all fields.');
+          return;
       }
       
       // Submit booking to server
       const response = await fetch('/api/book-ticket', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          eventId, 
-          tickets,
-          attendee: {
-            name: attendeeName,
-            email: attendeeEmail,
-            phone: attendeePhone
-          }
-        })
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+              eventId, 
+              tickets,
+              attendee: {
+                  name: attendeeName,
+                  email: attendeeEmail,
+                  phone: attendeePhone
+              }
+          })
       });
       
       const result = await response.json();
       
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to book tickets');
+          throw new Error(result.message || 'Failed to book tickets');
       }
       
       // Show confirmation
       showBookingConfirmation({
-        eventName: result.event.eventName,
-        tickets: tickets,
-        email: attendeeEmail,
-        confirmationCode: `TICKET-${eventId}-${Date.now().toString().slice(-6)}`
+          eventName: result.event.eventName,
+          tickets: tickets,
+          email: attendeeEmail,
+          confirmationCode: `TICKET-${eventId}-${Date.now().toString().slice(-6)}`
       });
       
-    } catch (error) {
+  } catch (error) {
       console.error('Error processing booking:', error);
       showBookingError(error.message || 'An error occurred while processing your booking. Please try again.');
-    }
   }
+}
+
+// Show booking confirmation
+function showBookingConfirmation(data) {
+  document.getElementById('event-details').style.display = 'none';
+  document.getElementById('booking-error').style.display = 'none';
   
-  // Show booking confirmation
-  function showBookingConfirmation(data) {
-    document.getElementById('event-details').style.display = 'none';
-    document.getElementById('booking-error').style.display = 'none';
-    
-    const confirmationSection = document.getElementById('booking-confirmation');
-    
-    // Populate confirmation details
-    document.getElementById('confirmation-event-name').textContent = data.eventName;
-    document.getElementById('confirmation-tickets').textContent = data.tickets;
-    document.getElementById('confirmation-email').textContent = data.email;
-    
-    // Generate QR code
-    if (window.QRCode) {
+  const confirmationSection = document.getElementById('booking-confirmation');
+  
+  // Populate confirmation details
+  document.getElementById('confirmation-event-name').textContent = data.eventName;
+  document.getElementById('confirmation-tickets').textContent = data.tickets;
+  document.getElementById('confirmation-email').textContent = data.email;
+  
+  // Generate QR code
+  if (window.QRCode) {
       const qrContainer = document.getElementById('qrcode');
       qrContainer.innerHTML = ''; // Clear previous QR code if any
       
       new QRCode(qrContainer, {
-        text: data.confirmationCode,
-        width: 128,
-        height: 128
+          text: data.confirmationCode,
+          width: 128,
+          height: 128
       });
-    }
-    
-    // Show confirmation
-    confirmationSection.style.display = 'block';
-    
-    // Scroll to top of confirmation
-    confirmationSection.scrollIntoView({ behavior: 'smooth' });
   }
   
-  // Show booking error
-  function showBookingError(message) {
-    document.getElementById('event-loading').style.display = 'none';
-    document.getElementById('event-details').style.display = 'none';
-    document.getElementById('booking-confirmation').style.display = 'none';
-    
-    const errorSection = document.getElementById('booking-error');
-    document.getElementById('error-message').textContent = message;
-    errorSection.style.display = 'block';
-  }
+  // Show confirmation
+  confirmationSection.style.display = 'block';
   
-  // Format date nicely
-  function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', weekday: 'long' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  }
+  // Scroll to top of confirmation
+  confirmationSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Show booking error
+function showBookingError(message) {
+  document.getElementById('event-loading').style.display = 'none';
+  document.getElementById('event-details').style.display = 'none';
+  document.getElementById('booking-confirmation').style.display = 'none';
   
+  const errorSection = document.getElementById('booking-error');
+  document.getElementById('error-message').textContent = message;
+  errorSection.style.display = 'block';
+}
+
+// Format date nicely
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', weekday: 'long' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
+}
