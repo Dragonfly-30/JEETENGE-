@@ -164,56 +164,14 @@ function setupModals() {
 function setupBookButtons() {
   const bookButtons = document.querySelectorAll('.event-card button[data-event-id]');
   bookButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
+    button.addEventListener('click', (e) => {
       const eventId = e.target.getAttribute('data-event-id');
-      const modal = document.getElementById('booking-modal');
       
-      if (!modal) {
-        console.error('Booking modal not found in the DOM');
-        return;
-      }
-      
-      try {
-        // Try to use cached event data if available
-        let event;
-        const cachedEvents = dataCache.events;
-        
-        if (cachedEvents) {
-          event = cachedEvents.find(e => e.eventId === eventId);
-        }
-        
-        // Fetch if not in cache
-        if (!event) {
-          const response = await fetch(`/api/events/${eventId}`);
-          if (!response.ok) throw new Error('Failed to fetch event details');
-          event = await response.json();
-        }
-        
-        // Populate modal with event details
-        document.getElementById('booking-event-name').textContent = event.eventName;
-        document.getElementById('booking-event-artist').textContent = `Artist: ${event.artistName}`;
-        document.getElementById('booking-event-date').textContent = `Date: ${formatDate(event.date)}`;
-        document.getElementById('booking-event-venue').textContent = `Venue: ${event.venue}`;
-        document.getElementById('booking-event-price').textContent = `Price: ₹${event.ticketPrice} per ticket`;
-        document.getElementById('booking-tickets-available').textContent = 
-          `Available: ${event.availableTickets} out of ${event.totalTickets}`;
-        
-        // Set event ID in hidden field
-        document.getElementById('booking-event-id').value = event.eventId;
-        
-        // Calculate initial total
-        const quantity = document.getElementById('ticket-quantity').value;
-        document.getElementById('ticket-total').textContent = (quantity * event.ticketPrice).toFixed(2);
-        
-        // Show modal
-        modal.style.display = 'block';
-        
-      } catch (error) {
-        console.error('Error getting event details:', error);
-        alert('Could not load event details. Please try again later.');
-      }
+      // Redirect to the booking page with the event ID
+      window.location.href = `/booking.html?eventId=${eventId}`;
     });
   });
+}
   
   // Handle quantity change - update total price
   const quantityInput = document.getElementById('ticket-quantity');
@@ -281,7 +239,6 @@ function setupBookButtons() {
       }
     });
   }
-}
 
 // Fetch and Display Events from the database
 // Modified version of fetchEvents function with ranking based on user preferences

@@ -177,6 +177,29 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// New code for Booking page
+
+// Make sure you have this in your server.js file
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// API routes
+app.use('/api', require('./route/events'));
+app.use('/api/spotify', require('./route/spotify'));
+
+// Serve the booking page
+app.get('/booking.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'booking.html'));
+});
+
+// Fallback route for SPA
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Ends here
+
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

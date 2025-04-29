@@ -104,32 +104,64 @@ router.get('/events/:eventId', async (req, res) => {
 });
 
 // Book tickets endpoint (keeping original code)
+// Book tickets endpoint with attendee information
 router.post('/book-ticket', async (req, res) => {
   try {
-    const { eventId, tickets } = req.body;
+    const { eventId, tickets, attendee } = req.body;
+    
+    // Validate inputs
     if (!eventId || !tickets || tickets < 1) {
-      return res.status(400).json({ message: 'Invalid request' });
+      return res.status(400).json({ message: 'Invalid request: missing event ID or tickets' });
     }
+    
+    // Validate attendee information if provided
+    if (attendee) {
+      if (!attendee.name || !attendee.email) {
+        return res.status(400).json({ message: 'Invalid request: missing attendee information' });
+      }
+    }
+    
     const event = await Event.findOne({ eventId });
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
+    
     if (event.availableTickets < tickets) {
       return res.status(400).json({ message: 'Not enough tickets available' });
     }
+    
     // Update available tickets
     event.availableTickets -= tickets;
     await event.save();
+    
     // In a real app, you'd also create a ticket record for the user
+    // For example:
+    /*
+    const ticketRecord = new Ticket({
+      eventId: event._id,
+      userId: req.user._id, // If user is authenticated
+      quantity: tickets,
+      attendee: attendee,
+      totalPrice: event.ticketPrice * tickets,
+      purchaseDate: new Date(),
+      confirmationCode: `TICKET-${eventId}-${Date.now().toString().slice(-6)}`
+    });
+    await ticketRecord.save();
+    */
+    
     res.json({
       success: true,
       message: `Successfully booked ${tickets} tickets for ${event.eventName}`,
-      event
+      event,
+      // You could include the ticket information here
+      // ticket: ticketRecord
     });
+    
   } catch (error) {
     console.error('Error booking tickets:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 module.exports = router;

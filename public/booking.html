@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Event - Music Event Platform</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>Music Event Platform</h1>
+            </div>
+            <div class="user-info">
+                <img id="user-avatar" src="/images/user_icon.webp" alt="User Avatar">
+                <div class="user-details">
+                    <p id="username">Welcome, Guest</p>
+                    <p id="user-email">Member</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button id="sidebar-close">×</button>
+            </div>
+            <div class="sidebar-content">
+                <ul>
+                    <li><a href="/dashboard.html" id="home-link">Home</a></li>
+                    <li><a href="/dashboard.html#events-section" id="events-link">Events</a></li>
+                    <li><a href="/dashboard.html#artists-section" id="artists-link">Artists</a></li>
+                    <li><a href="/dashboard.html#tracks-section" id="tracks-link">Tracks</a></li>
+                    <li><a href="/dashboard.html#tickets-section" id="tickets-link">Tickets</a></li>
+                    <li><a href="/dashboard.html#profile-section" id="profile-link">Profile</a></li>
+                    <li><a href="/dashboard.html#support-section" id="support-link">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <button id="sidebar-toggle">☰</button>
+            
+            <div class="content-section active" id="booking-section">
+                <h2>Book Event</h2>
+                <div id="event-loading">Loading event details...</div>
+                
+                <!-- Event Details Section -->
+                <div id="event-details" class="booking-details" style="display: none;">
+                    <div class="booking-flex">
+                        <div class="booking-image">
+                            <img id="event-image" src="/images/concert-placeholder.jpg" alt="Event Image">
+                        </div>
+                        <div class="booking-info">
+                            <h3 id="event-name">Event Name</h3>
+                            <p><strong>Artist:</strong> <span id="event-artist">Artist Name</span></p>
+                            <p><strong>Date:</strong> <span id="event-date">Event Date</span></p>
+                            <p><strong>Venue:</strong> <span id="event-venue">Event Venue</span></p>
+                            <p><strong>Price:</strong> ₹<span id="event-price">0.00</span> per ticket</p>
+                            <p><strong>Available Tickets:</strong> <span id="tickets-available">0</span> out of <span id="tickets-total">0</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Form -->
+                    <div class="booking-form-container">
+                        <h3>Book Your Tickets</h3>
+                        <form id="booking-form">
+                            <input type="hidden" id="booking-event-id" value="">
+                            
+                            <div class="form-group">
+                                <label for="ticket-quantity">Number of Tickets:</label>
+                                <input type="number" id="ticket-quantity" min="1" max="10" value="1" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="attendee-name">Full Name:</label>
+                                <input type="text" id="attendee-name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="attendee-email">Email:</label>
+                                <input type="email" id="attendee-email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="attendee-phone">Phone:</label>
+                                <input type="tel" id="attendee-phone" required>
+                            </div>
+                            
+                            <div class="price-summary">
+                                <p>Price per ticket: ₹<span id="per-ticket-price">0.00</span></p>
+                                <p>Total: ₹<span id="ticket-total">0.00</span></p>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="primary-button">Confirm Booking</button>
+                                <a href="/dashboard.html#events-section" class="secondary-button">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Booking Confirmation (hidden initially) -->
+                <div id="booking-confirmation" style="display: none;">
+                    <div class="confirmation-card">
+                        <div class="check-mark">✓</div>
+                        <h3>Booking Successful!</h3>
+                        <p>Your booking for <span id="confirmation-event-name">Event Name</span> is confirmed.</p>
+                        <p>Tickets: <span id="confirmation-tickets">1</span></p>
+                        <p>A confirmation email has been sent to <span id="confirmation-email">your email</span>.</p>
+                        <div id="qrcode"></div>
+                        <p class="qr-info">Show this QR code at the venue entrance</p>
+                        <div class="confirmation-actions">
+                            <a href="/dashboard.html#tickets-section" class="primary-button">View My Tickets</a>
+                            <a href="/dashboard.html#events-section" class="secondary-button">Browse More Events</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Message (hidden initially) -->
+                <div id="booking-error" style="display: none;">
+                    <div class="error-card">
+                        <div class="error-mark">✗</div>
+                        <h3>Booking Failed</h3>
+                        <p id="error-message">There was a problem processing your booking.</p>
+                        <div class="error-actions">
+                            <button id="retry-booking" class="primary-button">Try Again</button>
+                            <a href="/dashboard.html#events-section" class="secondary-button">Back to Events</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2023 Music Event Platform</p>
+        </footer>
+    </div>
+    
+    <!-- Include QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Include Main Script and Booking Script -->
+    <script src="/script.js"></script>
+    <script src="/booking.js"></script>
+</body>
+</html>
