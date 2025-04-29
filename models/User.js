@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   spotify_id: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },  // Removed unique constraint from email
   fan_score: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now },
   // New fields to store user preferences

@@ -17,11 +17,7 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 connectDB();
 
-
-
-
 // Middleware
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -36,7 +32,6 @@ app.use(
     cookie: { secure: false }, // Set to `true` if using HTTPS
   })
 );
-
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -54,12 +49,15 @@ passport.use(
         // Import User model directly here to avoid circular dependencies
         const User = require('./models/User');
         
+        // Generate a unique identifier for users without email
+        const email = profile.emails?.[0]?.value || `spotify-user-${profile.id}@example.com`;
+        
         let user = await User.findOne({ spotify_id: profile.id });
 
         if (!user) {
           user = new User({
             spotify_id: profile.id,
-            email: profile.emails?.[0]?.value || "N/A",
+            email: email,
           });
 
           await user.save();
@@ -119,10 +117,14 @@ app.post('/save-user-data', async (req, res) => {
     const { spotify_id, email, top_artists, top_tracks } = req.body;
     
     const User = require('./models/User');
+    
+    // Use a unique email for users without email
+    const userEmail = email === "N/A" ? `spotify-user-${spotify_id}@example.com` : email;
+    
     const user = await User.findOneAndUpdate(
       { spotify_id },
       { 
-        email,
+        email: userEmail,
         fan_score: calculateFanScore(top_artists, top_tracks) 
       },
       { new: true, upsert: true }
