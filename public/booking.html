@@ -21,9 +21,16 @@
             </div>
         </header>
         
-        <div class="sidebar">
+        <!-- Sidebar Toggle Button - Visible on mobile -->
+        <button id="sidebar-toggle" class="sidebar-toggle">☰</button>
+        
+        <!-- Sidebar -->
+        <div class="sidebar open">
             <div class="sidebar-header">
-                <button id="sidebar-close">×</button>
+                <button id="sidebar-close" class="sidebar-close">×</button>
+            </div>
+            <div class="logo">
+                <span>Music Events</span>
             </div>
             <div class="sidebar-content">
                 <ul>
@@ -39,8 +46,6 @@
         </div>
         
         <div class="main-content">
-            <button id="sidebar-toggle">☰</button>
-            
             <div class="content-section active" id="booking-section">
                 <h2>Book Event</h2>
                 <div id="event-loading">Loading event details...</div>
